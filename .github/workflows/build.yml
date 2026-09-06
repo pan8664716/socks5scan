@@ -1,0 +1,31 @@
+name: build
+
+# 仅在 push / PR / 手动触发时运行，不做定时任务。
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Vet
+        run: make vet
+
+      - name: Build all platforms
+        run: make all
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: socks5scan-binaries
+          path: bin/socks5scan-*

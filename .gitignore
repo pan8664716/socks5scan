@@ -1,0 +1,11 @@
+# socks5scan 构建产物（make build / make all 统一放到 bin/）。
+bin/*
+!bin/.gitkeep
+
+# 扫描结果输出文件统一放到 results/（-o 只给文件名时自动落到该目录）。
+results/*
+!results/.gitkeep
+!results/*.log.example
+
+# 本地 Go 构建缓存（沙箱环境下 GOCACHE 指向仓库内时产生）。
+.gocache/
