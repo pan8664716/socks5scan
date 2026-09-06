@@ -127,16 +127,16 @@ func parseFlags() *options {
 	flag.DurationVar(&o.readTimeout, "read-timeout", 1*time.Second, "SOCKS5 协商响应超时（Python 硬编码 1.0s）")
 
 	bool_(&o.verify, "", "verify", true, "对免认证候选做端到端验证")
-	flag.Bool("no-verify", true, "--verify 的取反写法")
+	noVerify := flag.Bool("no-verify", false, "--verify 的取反写法")
 	str(&o.verifyHost, "", "verify-host", "", "验证时的 CONNECT 目标主机")
 	int_(&o.verifyPort, "", "verify-port", 0, "验证时的 CONNECT 目标端口（默认 80）")
 	str(&o.verifyPath, "", "verify-path", "", "出口 IP 探测的 HTTP 路径（默认 /ip）")
 	flag.DurationVar(&o.verifyTimeout, "verify-timeout", 8*time.Second, "单次验证的墙钟超时（含两次 HTTP 校验，各 4s）")
 	bool_(&o.egress, "", "egress", true, "验证时探测出口 IP（依赖外部回显服务）")
-	flag.Bool("no-egress", true, "--egress 的取反写法")
+	noEgress := flag.Bool("no-egress", false, "--egress 的取反写法")
 
 	bool_(&o.weak, "", "weak", true, "对需认证代理用弱口令字典做验证")
-	flag.Bool("no-weak", true, "--weak 的取反写法")
+	noWeak := flag.Bool("no-weak", false, "--weak 的取反写法")
 	str(&o.wordlist, "w", "wordlist", "", "弱口令字典文件（默认使用内置字典）")
 	flag.DurationVar(&o.authTimeout, "auth-timeout", 8*time.Second, "单次弱口令认证尝试的超时（每次同样跑两次 HTTP 校验）")
 	flag.DurationVar(&o.asnTimeout, "asn-timeout", 10*time.Second, "ASN 前缀/组织名查询超时（Python 为 10s/5s）")
@@ -157,23 +157,23 @@ func parseFlags() *options {
 	flag.Usage = usage
 	flag.Parse()
 
-	o.applyDerived()
+	o.applyDerived(*noVerify, *noEgress, *noWeak)
 	return o
 }
 
 // applyDerived 处理互斥开关与默认值推导。
-func (o *options) applyDerived() {
+func (o *options) applyDerived(noVerify, noEgress, noWeak bool) {
 	explicit := map[string]bool{}
 	flag.Visit(func(f *flag.Flag) { explicit[f.Name] = true })
 
-	// --no-verify / --no-egress 是对应开关的取反写法。
-	if explicit["no-verify"] {
+	// --no-verify / --no-egress / --no-weak 是对应开关的取反写法。
+	if noVerify {
 		o.verify = false
 	}
-	if explicit["no-egress"] {
+	if noEgress {
 		o.egress = false
 	}
-	if explicit["no-weak"] {
+	if noWeak {
 		o.weak = false
 	}
 
@@ -589,7 +589,7 @@ func resolveOutPath(o string) string {
 	if o == "" {
 		return ""
 	}
-	if !strings.ContainsRune(o, '/') && !strings.ContainsRune(o, filepath.Separator) {
+	if !strings.ContainsAny(o, `/\`) {
 		return filepath.Join(resultsDir, o)
 	}
 	return o

@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible problem with socks5scan
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Release tag or commit (e.g. v0.1 or git describe --tags output)
+      placeholder: v0.1
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS, architecture, Go version
+      placeholder: macOS 15 arm64, go 1.21
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command line
+      description: Full command (redact sensitive targets)
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste [progress]/[done]/[error] lines from stderr
+      render: text
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs actual behavior
+    validations:
+      required: true

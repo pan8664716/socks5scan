@@ -39,7 +39,7 @@ test:
 	$(GO) test ./...
 
 clean:
-	rm -rf $(BINDIR)
+	find $(BINDIR) -mindepth 1 ! -name '.gitkeep' -delete
 
 help:
 	@echo "targets: build(默认本机) all linux darwin windows vet test clean"

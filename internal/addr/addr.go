@@ -168,7 +168,7 @@ func cidrRange(ipnet *net.IPNet, trim bool) (Range, error) {
 	return Range{Start: start, End: end}, nil
 }
 
-// ParsePorts 解析端口表达式，支持逗号与闭区间：
+// ParsePorts 解析端口表达式，支持逗号与闭区间（兼容中文逗号）：
 //
 //	1080
 //	1080,8080,8888
@@ -177,6 +177,7 @@ func cidrRange(ipnet *net.IPNet, trim bool) (Range, error) {
 //
 // 返回值去重并保持首次出现顺序（顺序只影响扫描次序，不影响结果）。
 func ParsePorts(spec string) ([]uint16, error) {
+	spec = strings.ReplaceAll(spec, "，", ",")
 	seen := make(map[uint16]bool)
 	var out []uint16
 
@@ -193,7 +194,7 @@ func ParsePorts(spec string) ([]uint16, error) {
 	}
 
 	for _, part := range strings.Split(spec, ",") {
-		part = strings.TrimSpace(strings.ReplaceAll(part, "，", ","))
+		part = strings.TrimSpace(part)
 		if part == "" {
 			continue
 		}
